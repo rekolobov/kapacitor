@@ -882,6 +882,11 @@ func (a *alertState) BufferedBatch(b edge.BufferedBatchMessage) (edge.Message, e
 		t = begin.Time()
 	}
 
+	//  Drop inhibited alert altogether
+	if a.n.et.tm.AlertService.IsInhibited(a.n.a.Category, begin.Tags()) {
+		return nil, nil
+	}
+
 	a.addEvent(t, l)
 
 	// Trigger alert only if:
@@ -941,6 +946,11 @@ func (a *alertState) Point(p edge.PointMessage) (edge.Message, error) {
 		return nil, err
 	}
 	l := a.n.determineLevel(p, a.currentLevel())
+
+	//  Drop inhibited alert altogether
+	if a.n.et.tm.AlertService.IsInhibited(a.n.a.Category, p.Tags()) {
+		return nil, nil
+	}
 
 	a.addEvent(p.Time(), l)
 
